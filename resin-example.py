@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#https://docs.resin.io/reference/resinOS/network/2.x
+
 import dbus, uuid
 
 ## Change these values
