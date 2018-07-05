@@ -1,0 +1,24 @@
+<html>
+    <body>
+        <form method="POST">
+            <ul>
+                <li>SSID:<select name="essid">
+                    {% if essids %}
+                    <option selected="selected" disabled="disabled" value="">Please Select...</option>
+                    {% for line in essids %}
+                    <option value="{{ line }}">{{ line }}</option>
+                    {% endfor %}
+                    {% else %}
+                    <option value="">No Wifi's Found</option>
+                    {% endif %}
+                </select></li>
+                <li>Password:<input name="psk"></li>
+                <br>
+                <li>Username:<input name="usr"></li>
+                <li>API Key:<input name="key"></li>
+                <br>
+                <input type="submit" value="Save">                
+            </ul>
+        </form>
+    </body>
+</html>
