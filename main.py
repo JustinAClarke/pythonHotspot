@@ -17,46 +17,28 @@
 
 from flask import Flask, request, render_template
 
+import dev as nm
+
 import subprocess
 app = Flask(__name__)
 
 def get_essids():
-    essids=[]
-    output=subprocess.check_output("iwlist scan |grep ESSID", shell=True)
-    arr=output.decode('ascii').split('\n')
-    print(arr)
-    for ssid in arr:
-        if(ssid != ""):
-            print(ssid)
-            tmp1=ssid.strip()
-            tmp2=tmp1.split('"')
-            essids.append(tmp2[1])
-    print(output)
-    print(essids)
-    
+    essids=nm.get_ssids()
     return essids
-
-def save_wifi():
-    pass
-
-def save_adafruit():
-    pass
 
 
 def show_settings():
     pass
-    return render_template('settings.html',essids=get_essids())
+    return render_template('settings.html',title='Settings', essids=get_essids())
 
 def save_settings():
-    pass
     essid = request.form['essid']
     psk = request.form['psk']
-    
-    username = request.form['usr']
-    key = request.form['key']
 
-    
-    return render_template('saved.html')
+    nm.remove_connection(ssid)
+    nm.create_connection(essid,psk)
+
+    return render_template('saved.html', title='Saved')
 
 
 
@@ -69,4 +51,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0',debug=True)

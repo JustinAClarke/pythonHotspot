@@ -1,24 +1,34 @@
-<html>
-    <body>
-        <form method="POST">
-            <ul>
-                <li>SSID:<select name="essid">
-                    {% if essids %}
-                    <option selected="selected" disabled="disabled" value="">Please Select...</option>
-                    {% for line in essids %}
-                    <option value="{{ line }}">{{ line }}</option>
-                    {% endfor %}
-                    {% else %}
-                    <option value="">No Wifi's Found</option>
-                    {% endif %}
-                </select></li>
-                <li>Password:<input name="psk"></li>
-                <br>
-                <li>Username:<input name="usr"></li>
-                <li>API Key:<input name="key"></li>
-                <br>
-                <input type="submit" value="Save">                
-            </ul>
-        </form>
-    </body>
-</html>
+{% extends 'base.html' %}
+{% block main%}
+    <form method="POST">
+        <ul>
+            <li>SSID:<select id="ssid_opt" required="required" name="essid">
+                {% if essids %}
+                <option selected="selected" disabled="disabled" value="">Please Select...</option>
+                {% for line in essids %}
+                <option value="{{ line.essid }}">{{ line.essid }}</option>
+                {% endfor %}
+                <option value="other">Other</option>
+                {% else %}
+                <option value="">No Wifi's Found</option>
+                {% endif %}
+            </select></li>
+            <li id="ssid_other" hidden='true'>Other:<input name="essid_other"></li>
+            <li>Password:<input required="required" name="psk"></li>
+            <input type="submit" value="Save">                
+        </ul>
+    </form>
+    <script type="text/javascript">
+        var ssid_opt = document.getElementById('ssid_opt');
+        ssid_opt.onchange = function(){
+           if(this.value == 'other'){
+                document.getElementById('ssid_other').hidden=false;
+                document.getElementById('ssid_other').required=true;
+            }
+            else{
+                document.getElementById('ssid_other').hidden=true;
+                document.getElementById('ssid_other').required=false;
+            }
+        };
+    </script>
+{% endblock %}

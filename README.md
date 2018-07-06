@@ -53,8 +53,8 @@ in not having to have additional dependents on the system.
 
 ### TODO
 
- * Built the web page
- * Design the web page
+ * Built the web page (testing)
+ * Design the web page (next)
  * Pipify the program/module
  * Create automated tests
  * Confirm it works in Docker, with Resin
