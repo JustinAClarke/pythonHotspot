@@ -36,6 +36,7 @@ def get_hotspot(ssid,psk):
 
 def activate_hotspot(ssid,psk):
     conn = get_hotspot(ssid,psk)
+    '''
     # Find a suitable device
     ctype = conn.GetSettings()['connection']['type']
     if ctype == 'vpn':
@@ -59,9 +60,10 @@ def activate_hotspot(ssid,psk):
         else:
             raise Exception("No suitable and available %s device found" % ctype)
             
-
+    '''
     # And connect
-    return NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
+    return conn
+    #return NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
 
 def remove_connection(ssid):
     for connection in NetworkManager.Settings.Connections:
@@ -70,6 +72,8 @@ def remove_connection(ssid):
             connection.Delete()
 
 def get_ssids():
+    rescan_ssids()
+    
     ssids=[]
     for dev in NetworkManager.NetworkManager.GetDevices():
         if dev.DeviceType != NetworkManager.NM_DEVICE_TYPE_WIFI:
@@ -78,6 +82,21 @@ def get_ssids():
             ssids.append({'essid':ap.Ssid,'freq':ap.Frequency,'strength':ap.Strength})
     return ssids
 
+def is_connected():
+    if NetworkManager.NetworkManager.Connectivity != 4:
+        return False
+    else:
+        return True
+
+def deactivate_connections():
+    for active in NetworkManager.NetworkManager.ActiveConnections:
+        NetworkManager.NetworkManager.DeactivateConnection(active)
+
+def rescan_ssids():
+    for device in NetworkManager.NetworkManager.Devices:
+        if device.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
+            device.RequestScan({})
+            
 if __name__ == "__main__":
     if NetworkManager.NetworkManager.Connectivity != 4:
         print("No Network starting hotspot")

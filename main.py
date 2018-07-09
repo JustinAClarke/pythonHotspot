@@ -15,12 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from time import sleep
+
 from flask import Flask, request, render_template
 
 import dev as nm
 
-import subprocess
 app = Flask(__name__)
+
+SSID = "pyHotspot"
+PSK = "P@s5w0rd!"
 
 def get_essids():
     essids=nm.get_ssids()
@@ -51,4 +55,15 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',debug=True)
+    if not nm.is_connected():
+        print("No Network starting hotspot")
+        #Networking failed, run hotspot
+        nm.deactivate_connections()
+        sleep(5)
+        print(nm.get_ssids())
+        hotspot_startup = nm.activate_hotspot(SSID,PSK)
+    else:
+        print("Network Connected, not doing anything")
+
+    #either way start web page
+    app.run(host='0.0.0.0')
