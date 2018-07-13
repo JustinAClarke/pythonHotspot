@@ -17,7 +17,7 @@
 
 from time import sleep
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 
 import dev as nm
 
@@ -53,6 +53,10 @@ def index():
     else:
         return show_settings()
 
+@app.route('/refresh', methods=['GET'])
+def refresh():
+    ssids=nm.get_ssids()
+    return jsonify(ssids)
 
 if __name__ == "__main__":
     if not nm.is_connected():

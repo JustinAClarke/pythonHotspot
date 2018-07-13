@@ -1,8 +1,11 @@
 import NetworkManager
 import uuid
 
+import os,time,json
+
 SSID='resin'
 PSK='resintest'
+SSID_TMP='/tmp/ssids'
 
 def create_connection(ssid,psk,hotspot=False):
     mode='infrastructure'
@@ -71,15 +74,32 @@ def remove_connection(ssid):
             print(connection)
             connection.Delete()
 
-def get_ssids():
+def update_ssids():
     rescan_ssids()
-    
+    time.sleep(5)
     ssids=[]
     for dev in NetworkManager.NetworkManager.GetDevices():
         if dev.DeviceType != NetworkManager.NM_DEVICE_TYPE_WIFI:
             continue
         for ap in dev.GetAccessPoints():
             ssids.append({'essid':ap.Ssid,'freq':ap.Frequency,'strength':ap.Strength})
+            
+    f=open(SSID_TMP,'w')
+    f.write(json.dumps(ssids, indent=4))
+
+def get_ssids():
+    #check /tmp file, if older than 3min then update, else pull latest
+    try:
+        mtime = os.path.getmtime(SSID_TMP)
+        ctime = time.time()
+        if ctime-mtime >=180:
+            update_ssids()
+    except OSError:
+        update_ssids()
+    f=open(SSID_TMP,'r')
+    data=f.read()
+    ssids=json.loads(data)
+    
     return ssids
 
 def is_connected():
