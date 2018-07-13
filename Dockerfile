@@ -2,7 +2,9 @@ FROM resin/raspberry-pi-debian
 
 # install required packages
 RUN apt-get update && apt-get install -yq --no-install-recommends \
-    wireless-tools hostapd dnsmask \
+    wireless-tools hostapd dnsmasq \
+    network-manager \
+    python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # define our working directory in the container

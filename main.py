@@ -39,8 +39,8 @@ def save_settings():
     essid = request.form['essid']
     psk = request.form['psk']
 
-    nm.remove_connection(ssid)
     nm.create_connection(essid,psk)
+    nm.remove_connection(ssid)
 
     return render_template('saved.html', title='Saved')
 
