@@ -1,0 +1,14 @@
+[Unit]
+Description=Python Hotspot Setup system
+After=network.target
+
+[Service]
+Environment=SYSTEMD_LOG_LEVEL=debug
+Restart=always
+RestartSec=10
+Type=simple
+ExecStart=/usr/bin/python3 /opt/pythonHotspot/main.py
+
+[Install]
+WantedBy=multi-user.target
+
