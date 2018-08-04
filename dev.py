@@ -7,7 +7,7 @@ SSID='resin'
 PSK='resintest'
 SSID_TMP='/tmp/ssids'
 
-def create_connection(ssid,psk,hotspot=False):
+def create_connection(ssid,secure=False,psk='12341234',hotspot=False):
     mode='infrastructure'
     ip_setting='auto'
     if hotspot:
@@ -15,15 +15,18 @@ def create_connection(ssid,psk,hotspot=False):
         ip_setting='shared'
     hotspot = {
          '802-11-wireless': {'mode': mode,
-                             'security': '802-11-wireless-security',
                              'ssid': ssid},
-         '802-11-wireless-security': {'auth-alg': 'open', 'key-mgmt': 'wpa-psk', 'psk': psk},
+         
          'connection': {'id': ssid,
                         'type': '802-11-wireless',
                         'uuid': str(uuid.uuid4())},
          'ipv4': {'method': ip_setting},
          'ipv6': {'method': ip_setting}
     }
+    if secure:
+        hotspot['802-11-wireless-security'] = {'auth-alg': 'open', 'key-mgmt': 'wpa-psk', 'psk': psk}
+        hotspot['802-11-wireless']['security'] = '802-11-wireless-security'
+        
 
     return NetworkManager.Settings.AddConnection(hotspot)
 
@@ -116,7 +119,57 @@ def rescan_ssids():
     for device in NetworkManager.NetworkManager.Devices:
         if device.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI:
             device.RequestScan({})
-            
+
+def get_connections():
+    connections = NetworkManager.Settings.ListConnections()
+
+    con_tmp = dict()
+    for x in connections:
+        tpe = x.GetSettings()['connection']['type']
+        name = x.GetSettings()['connection']['id']
+        print("{}: {}".format(name,tpe))
+        if tpe == "802-11-wireless":
+            con_tmp[name]=x
+    return con_tmp
+
+def activate_connection(name):
+    #from pip python-networkmanager example
+    """
+    Activate a connection by name
+    """
+
+    # Find the connection
+    connections = NetworkManager.Settings.ListConnections()
+    connections = dict([(x.GetSettings()['connection']['id'], x) for x in connections])
+    conn = connections[name]
+
+    # Find a suitable device
+    ctype = conn.GetSettings()['connection']['type']
+    if ctype == 'vpn':
+        for dev in NetworkManager.NetworkManager.GetDevices():
+            if dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED and dev.Managed:
+                break
+        else:
+            print("No active, managed device found")
+            sys.exit(1)
+    else:
+        dtype = {
+            '802-11-wireless': NetworkManager.NM_DEVICE_TYPE_WIFI,
+            '802-3-ethernet': NetworkManager.NM_DEVICE_TYPE_ETHERNET,
+            'gsm': NetworkManager.NM_DEVICE_TYPE_MODEM,
+        }.get(ctype,ctype)
+        devices = NetworkManager.NetworkManager.GetDevices()
+
+        for dev in devices:
+            if dev.DeviceType == dtype and dev.State == NetworkManager.NM_DEVICE_STATE_DISCONNECTED:
+                break
+        else:
+            print("No suitable and available %s device found" % ctype)
+            sys.exit(1)
+
+    # And connect
+    NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
+
 if __name__ == "__main__":
     if NetworkManager.NetworkManager.Connectivity != 4:
         print("No Network starting hotspot")
